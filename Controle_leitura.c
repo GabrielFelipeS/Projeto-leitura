@@ -4,7 +4,7 @@ void menu (void) {
     LimparTela_Pausar(1);
     //int escolha = ColetarApenasInteiros("[0] Adicionar meta\n[1] Mostrar historico de metas \n ");
 
-    switch(ColetarApenasInteiros("---------------------------------\n|\tEscolha uma opÃ§Ã£o      \t|\n---------------------------------\n[0] Adicionar meta \t\t|\n[1] Mostrar historico de metas  |\n---------------------------------\n")) {
+    switch(ColetarApenasInteiros("---------------------------------\n|\tEscolha uma opção      \t|\n---------------------------------\n[0] Adicionar meta \t\t|\n[1] Mostrar historico de metas  |\n---------------------------------\n")) {
         case 0:
             LimparTela_Pausar(1);
             Adicionar_meta();
@@ -61,8 +61,8 @@ METAS Coletar_Dados(void) {
     printf("Digite o nome do livro: ");
         fgets(meta.livro.nome, 50, stdin);
 
-    meta.livro.PaginaInicial = ColetarApenasInteiros("Digite o nÃºmero da pÃ¡gina inicial: ");
-    meta.livro.PaginaFinal = ColetarApenasInteiros("Digite o nÃºmero da pÃ¡gina final: ");
+    meta.livro.PaginaInicial = ColetarApenasInteiros("Digite o número da página inicial: ");
+    meta.livro.PaginaFinal = ColetarApenasInteiros("Digite o número da página final: ");
     meta.QuantidadeDias = ColetarApenasInteiros("Digite em quantos dias gostaria de ler o livro: ");
 
     //Calculo de paginas baseado no valor entregue pelo usuario
@@ -92,18 +92,20 @@ void printar_meta(void) {
     fseek(arquivo, sizeof(METAS) * -1, SEEK_END);
     fread(&meta, sizeof(METAS), 1, arquivo);
 
-    printf("\nVocÃª deve se encontrar em tal pagina a cada dia para completar a meta: \n");
-    for (int por_Dia = 0; por_Dia < meta.QuantidadeDias; por_Dia++) {
-        printf("| %2dÂº dia: %02.2f\t", por_Dia + 1, meta.Leitura_porDia);
+    float pagina_atual = meta.livro.PaginaInicial;
 
+    printf("\nVocê deve se encontrar em tal pagina a cada dia para completar a meta: \n");
+    for (int por_Dia = 0; por_Dia < meta.QuantidadeDias; por_Dia++) {
+        pagina_atual += meta.Leitura_porDia;
+        printf("| %2dº dia: %02.2f\t", por_Dia + 1, pagina_atual);
         if (por_Dia % 2 != 0){
             printf("\n");
         }
     }
 
-    printf("\nA meta Ã© ler %sQue comeÃ§a na pÃ¡gina %d e termina na pÃ¡gina %d\n", meta.livro.nome, meta.livro.PaginaInicial, meta.livro.PaginaFinal);
-    printf("Lendo %.2f pÃ¡ginas por dia durante %d dias\n", meta.Leitura_porDia, meta.QuantidadeDias);
-    printf("Dia de modificaÃ§Ã£o: %02d/%02d/%4d", meta.modificacao.dia, meta.modificacao.mes, meta.modificacao.ano);
+    printf("\nA meta é ler %sQue começa na página %d e termina na página %d\n", meta.livro.nome, meta.livro.PaginaInicial, meta.livro.PaginaFinal);
+    printf("Lendo %.2f páginas por dia durante %d dias\n", meta.Leitura_porDia, meta.QuantidadeDias);
+    printf("Dia de modificação: %02d/%02d/%4d", meta.modificacao.dia, meta.modificacao.mes, meta.modificacao.ano);
 
     return;
 }
@@ -120,7 +122,7 @@ void Mostrar_historico(void) {
     int tamanho_arquivo = tamanho(arquivo);
 
     if (tamanho_arquivo == 0) {
-        printf("NÃ£o existe historico para mostrar\n");
+        printf("Não existe historico para mostrar\n");
         fclose(arquivo);
         LimparTela_Pausar(2);
         return;
@@ -130,9 +132,9 @@ void Mostrar_historico(void) {
 
     for (int i = 0; i < tamanho_arquivo; i++) {
         fread(&meta, sizeof(METAS), 1, arquivo);
-        printf("\nID: %03d\nNome: %sNÃºmero da pÃ¡gina inicial: %3d\nNÃºmero da pÃ¡gina final: %3d", meta.ID ,meta.livro.nome, meta.livro.PaginaInicial, meta.livro.PaginaFinal);
+        printf("\nID: %03d\nNome: %sNúmero da página inicial: %3d\nNúmero da página final: %3d", meta.ID ,meta.livro.nome, meta.livro.PaginaInicial, meta.livro.PaginaFinal);
         printf("\nLeitura por dia: %3.2f\nQuantidade de dias: %3d", meta.Leitura_porDia, meta.QuantidadeDias);
-        printf("\nData de modificaÃ§Ã£o: %02d/%02d/%4d", meta.modificacao.dia, meta.modificacao.mes, meta.modificacao.ano );
+        printf("\nData de modificação: %02d/%02d/%4d", meta.modificacao.dia, meta.modificacao.mes, meta.modificacao.ano );
     }
 
     fclose(arquivo);
