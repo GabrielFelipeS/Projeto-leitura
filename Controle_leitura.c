@@ -4,16 +4,30 @@ void menu (void) {
     LimparTela_Pausar(1);
     //int escolha = ColetarApenasInteiros("[0] Adicionar meta\n[1] Mostrar historico de metas \n ");
 
-    switch(ColetarApenasInteiros("---------------------------------\n|\tEscolha uma opção      \t|\n---------------------------------\n[0] Adicionar meta \t\t|\n[1] Mostrar historico de metas  |\n---------------------------------\n")) {
+    switch(ColetarApenasInteiros("---------------------------------\n|\tEscolha uma opção      \t|\n---------------------------------\n[0] Adicionar meta \t\t|\n[1] Alterar meta\t\t|\n[2] Excluir meta\t\t|\n[3] Printar meta\t\t|\n[4] Mostrar historico de metas  |\n---------------------------------\n")) {
         case 0:
             LimparTela_Pausar(1);
             Adicionar_meta();
             break;
         case 1:
             LimparTela_Pausar(1);
-            Mostrar_historico();
+            Alterar_meta();
             break;
 
+        case 2:
+            LimparTela_Pausar(1);
+            Excluir_meta();
+            break;
+
+        case 3:
+            LimparTela_Pausar(1);
+            Mostrar_meta();
+            break;
+
+        case 4:
+            LimparTela_Pausar(1);
+            Mostrar_historico();
+            break;
         default:
             exit(0);
     }
@@ -21,23 +35,20 @@ void menu (void) {
 }
 
 void Adicionar_meta(void) {
-    FILE *arquivo = fopen("dados_leitura.txt","ab");
     METAS meta;
-      if (arquivo == NULL) {
-        printf("Erro na abertura!!\n");
-        LimparTela_Pausar(2);
-        exit(1);
-    }
+    FILE *arquivo = fopen("dados_leitura.txt","a+b");
+    verificar_ErroAbrir(arquivo);
+
+    int tamanho_arquivo = tamanho(arquivo);
 
     printf("\tDigite os dados a seguir:\n\n");
     meta = Coletar_Dados();
+    meta.ID = tamanho_arquivo + 1;
 
     fwrite(&meta, sizeof(METAS), 1, arquivo);
     fclose(arquivo);
 
-    printar_meta();
-
-
+    printar_meta(tamanho_arquivo);
 
     LimparTela_Pausar(2);
     return;
@@ -46,18 +57,7 @@ void Adicionar_meta(void) {
 METAS Coletar_Dados(void) {
     METAS meta;
     //Dados inseridos pelo usuario
-    FILE *arquivo = fopen("dados_leitura.txt","rb");
-    if (arquivo == NULL) {
-        printf("ERRO!\nNa abertura do arquvio.");
-        LimparTela_Pausar(2);
-        exit(1);
-    }
 
-    int tamanho_arquivo = tamanho(arquivo);
-    fclose(arquivo);
-
-
-    meta.ID = tamanho_arquivo + 1;
     printf("Digite o nome do livro: ");
         fgets(meta.livro.nome, 50, stdin);
 
@@ -80,16 +80,12 @@ METAS Coletar_Dados(void) {
     return meta;
 }
 
-void printar_meta(void) {
+void printar_meta(int ir) {
     METAS meta;
     FILE *arquivo = fopen("dados_leitura.txt","rb");
-    if (arquivo == NULL) {
-        printf("ERRO!\nNa abertura do arquvio.");
-        LimparTela_Pausar(2);
-        exit(1);
-    }
+    verificar_ErroAbrir(arquivo);
 
-    fseek(arquivo, sizeof(METAS) * -1, SEEK_END);
+    fseek(arquivo, sizeof(METAS) * ir, SEEK_SET);
     fread(&meta, sizeof(METAS), 1, arquivo);
 
     float pagina_atual = meta.livro.PaginaInicial;
@@ -113,11 +109,7 @@ void printar_meta(void) {
 void Mostrar_historico(void) {
     METAS meta;
     FILE *arquivo = fopen("dados_leitura.txt", "rb");
-    if (arquivo == NULL) {
-        printf("ERRO!\nNa abertura do arquvio.");
-        LimparTela_Pausar(2);
-        exit(1);
-    }
+    verificar_ErroAbrir(arquivo);
 
     int tamanho_arquivo = tamanho(arquivo);
 
@@ -134,7 +126,7 @@ void Mostrar_historico(void) {
         fread(&meta, sizeof(METAS), 1, arquivo);
         printf("\nID: %03d\nNome: %sNúmero da página inicial: %3d\nNúmero da página final: %3d", meta.ID ,meta.livro.nome, meta.livro.PaginaInicial, meta.livro.PaginaFinal);
         printf("\nLeitura por dia: %3.2f\nQuantidade de dias: %3d", meta.Leitura_porDia, meta.QuantidadeDias);
-        printf("\nData de modificação: %02d/%02d/%4d", meta.modificacao.dia, meta.modificacao.mes, meta.modificacao.ano );
+        printf("\nData de modificação: %02d/%02d/%4d\n", meta.modificacao.dia, meta.modificacao.mes, meta.modificacao.ano );
     }
 
     fclose(arquivo);
@@ -142,61 +134,68 @@ void Mostrar_historico(void) {
     return;
 }
 
-int tamanho(FILE *arquivo) {
-        if (arquivo == NULL) {
-        printf("Erro na abertura!!\n");
-        LimparTela_Pausar(2);
-        exit(1);
-    }
-    fseek(arquivo, 0, SEEK_END);
+void Mostrar_meta() {
+    FILE *arquivo = fopen("dados_leitura.txt", "rb");
+    verificar_ErroAbrir(arquivo);
 
-    int tamanho = ftell(arquivo) / sizeof(METAS);
-    return tamanho;
+    int escolha =  escolher_meta(arquivo);
+
+
+    printar_meta(escolha - 1);
+
+    LimparTela_Pausar(2);
+    fclose(arquivo);
+    return;
 }
 
-int ColetarApenasInteiros(char mensagem[]) {
-    bool loop;
-    char string[11];
+void Alterar_meta() {
+    METAS meta;
+    FILE *arquivo = fopen("dados_leitura.txt", "r+b");
+    verificar_ErroAbrir(arquivo);
 
-    do {
-        loop = false;
-        printf("%s", mensagem);
-            fgets(string, 11, stdin);
-        int tamanho = strlen(string);
-        for ( int i = 0; i < tamanho; i++) {
-            if (isalpha(string[i])) {
-                loop = true;
-                printf("ERRO!\n");
-                break;
-            }
-        }
+    int escolha =  escolher_meta(arquivo);
+    printar_meta(escolha - 1);
 
-        fflush(stdin);
-    } while(loop);
+    meta = Coletar_Dados();
 
-    return atoi(string);
-}
+    fseek(arquivo, sizeof(METAS) * (escolha - 1), SEEK_SET);
+    meta.ID = (ftell(arquivo) / sizeof(METAS)) + 1;
 
-void LimparTela_Pausar(unsigned short int escolha) {
-#ifdef OS_WINDOWS
-    if(escolha == 1) {
-        system("cls");
+    fwrite(&meta, sizeof(METAS), 1, arquivo);
+        fclose(arquivo);
 
-    } else if (escolha == 2) {
-        printf("\n\n");
-        system("pause");
-    }
-#else
-    if(escolha == 1) {
-        system("clear");
+    printar_meta(escolha - 1);
 
-    } else if (escolha == 2) {
-        printf("\n\n");
-        getchar();
-    }
-
-#endif // OS_WINDOWS
-
+    LimparTela_Pausar(2);
 
     return;
 }
+
+void Excluir_meta() {
+    METAS meta;
+    FILE *arquivo = fopen("dados_leitura.txt", "r+b");
+    verificar_ErroAbrir(arquivo);
+
+    int pular = escolher_meta(arquivo);
+
+    int tamanho_arquivo = tamanho(arquivo);
+
+    //!feof(arquivo)
+    for (int i = pular; i < tamanho_arquivo ; i++) {
+        fseek(arquivo, sizeof(METAS) * pular, SEEK_SET);
+        fread(&meta, sizeof(METAS), 1, arquivo);
+        fseek(arquivo, sizeof(METAS) * (pular - 1), SEEK_SET);
+        meta.ID = (ftell(arquivo) / sizeof(METAS)) + 1;
+        fwrite(&meta, sizeof(METAS) , 1, arquivo);
+        pular++;
+    }
+
+    METAS *apagar = calloc(1, 0);
+    fseek(arquivo, sizeof(METAS) * -1, SEEK_END);
+    fwrite(apagar, 0, 1, arquivo);
+
+    free(apagar);
+    fclose(arquivo);
+    return;
+}
+

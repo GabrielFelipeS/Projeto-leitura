@@ -37,18 +37,22 @@ typedef struct {
     DATAS modificacao;
 } METAS;
 
-//Funções casuais
+//Funções casuais - Encontradas do Controle_leitura
 void menu(void);
 void Adicionar_meta(void);
 METAS Coletar_Dados(void);
 void Mostrar_historico(void);
-void printar_meta(void);
+void printar_meta(int ir);
+void Mostrar_meta(void);
+void Alterar_meta(void);
+void Excluir_meta(void);
 
-// funções de controle de dados
+// Funções de controle de dados - Econtradas na main para facilitar a organização
 int tamanho (FILE *arquivo);
+void verificar_ErroAbrir (FILE *arquivo);
+int escolher_meta(FILE *arquivo);
 int ColetarApenasInteiros(char mensagem[]);
 void LimparTela_Pausar(unsigned short int escolha);
-
 
 
 
