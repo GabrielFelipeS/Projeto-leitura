@@ -4,7 +4,7 @@ void menu (void) {
     LimparTela_Pausar(1);
     //int escolha = ColetarApenasInteiros("[0] Adicionar meta\n[1] Mostrar historico de metas \n ");
 
-    switch(ColetarApenasInteiros("---------------------------------\n|\tEscolha uma opção      \t|\n---------------------------------\n[0] Adicionar meta \t\t|\n[1] Alterar meta\t\t|\n[2] Excluir meta\t\t|\n[3] Printar meta\t\t|\n[4] Mostrar historico de metas  |\n---------------------------------\n")) {
+    switch(ColetarApenasInteiros("---------------------------------\n|\tEscolha uma opção      \t|\n---------------------------------\n[0] Adicionar meta \t\t|\n[1] Alterar meta\t\t|\n[2] Excluir meta\t\t|\n[3] Printar meta\t\t|\n[4] Mostrar histórico de metas  |\n[5] Outro numero para finalziar |\n---------------------------------\n")) {
         case 0:
             LimparTela_Pausar(1);
             Adicionar_meta();
@@ -84,6 +84,10 @@ void printar_meta(int ir) {
     METAS meta;
     FILE *arquivo = fopen("dados_leitura.txt","rb");
     verificar_ErroAbrir(arquivo);
+    if (tamanho(arquivo) == 0) {
+        fclose(arquivo);
+        return;
+    }
 
     fseek(arquivo, sizeof(METAS) * ir, SEEK_SET);
     fread(&meta, sizeof(METAS), 1, arquivo);
@@ -101,7 +105,7 @@ void printar_meta(int ir) {
 
     printf("\nA meta é ler %sQue começa na página %d e termina na página %d\n", meta.livro.nome, meta.livro.PaginaInicial, meta.livro.PaginaFinal);
     printf("Lendo %.2f páginas por dia durante %d dias\n", meta.Leitura_porDia, meta.QuantidadeDias);
-    printf("Dia de modificação: %02d/%02d/%4d", meta.modificacao.dia, meta.modificacao.mes, meta.modificacao.ano);
+    printf("Dia de modificação: %02d/%02d/%4d\n", meta.modificacao.dia, meta.modificacao.mes, meta.modificacao.ano);
 
     return;
 }
@@ -114,7 +118,7 @@ void Mostrar_historico(void) {
     int tamanho_arquivo = tamanho(arquivo);
 
     if (tamanho_arquivo == 0) {
-        printf("Não existe historico para mostrar\n");
+        printf("Não existe histórico para mostrar\n");
         fclose(arquivo);
         LimparTela_Pausar(2);
         return;
@@ -124,7 +128,7 @@ void Mostrar_historico(void) {
 
     for (int i = 0; i < tamanho_arquivo; i++) {
         fread(&meta, sizeof(METAS), 1, arquivo);
-        printf("\nID: %03d\nNome: %sNúmero da página inicial: %3d\nNúmero da página final: %3d", meta.ID ,meta.livro.nome, meta.livro.PaginaInicial, meta.livro.PaginaFinal);
+        printf("\nID: %03d\nNome: %sNúmero da página inicial: %2d\nNúmero da página final: %3d", meta.ID ,meta.livro.nome, meta.livro.PaginaInicial, meta.livro.PaginaFinal);
         printf("\nLeitura por dia: %3.2f\nQuantidade de dias: %3d", meta.Leitura_porDia, meta.QuantidadeDias);
         printf("\nData de modificação: %02d/%02d/%4d\n", meta.modificacao.dia, meta.modificacao.mes, meta.modificacao.ano );
     }
@@ -139,12 +143,15 @@ void Mostrar_meta() {
     verificar_ErroAbrir(arquivo);
 
     int escolha =  escolher_meta(arquivo);
-
+    if (tamanho(arquivo) == 0) {
+        fclose(arquivo);
+        return;
+    }
 
     printar_meta(escolha - 1);
 
     LimparTela_Pausar(2);
-    fclose(arquivo);
+
     return;
 }
 
@@ -152,6 +159,12 @@ void Alterar_meta() {
     METAS meta;
     FILE *arquivo = fopen("dados_leitura.txt", "r+b");
     verificar_ErroAbrir(arquivo);
+    if (tamanho(arquivo) == 0) {
+        printf("Não existe histórico para mostrar\n");
+        fclose(arquivo);
+        LimparTela_Pausar(2);
+        return;
+    }
 
     int escolha =  escolher_meta(arquivo);
     printar_meta(escolha - 1);
@@ -172,29 +185,36 @@ void Alterar_meta() {
 }
 
 void Excluir_meta() {
-    METAS meta;
-    FILE *arquivo = fopen("dados_leitura.txt", "r+b");
+
+    FILE *arquivo = fopen("dados_leitura.txt", "rb");
     verificar_ErroAbrir(arquivo);
 
-    int pular = escolher_meta(arquivo);
-
     int tamanho_arquivo = tamanho(arquivo);
-
-    //!feof(arquivo)
-    for (int i = pular; i < tamanho_arquivo ; i++) {
-        fseek(arquivo, sizeof(METAS) * pular, SEEK_SET);
-        fread(&meta, sizeof(METAS), 1, arquivo);
-        fseek(arquivo, sizeof(METAS) * (pular - 1), SEEK_SET);
-        meta.ID = (ftell(arquivo) / sizeof(METAS)) + 1;
-        fwrite(&meta, sizeof(METAS) , 1, arquivo);
-        pular++;
+    if (tamanho_arquivo == 0) {
+        printf("Não existe histórico para excluir\n");
+        fclose(arquivo);
+        LimparTela_Pausar(2);
+        return;
     }
 
-    METAS *apagar = calloc(1, 0);
-    fseek(arquivo, sizeof(METAS) * -1, SEEK_END);
-    fwrite(apagar, 0, 1, arquivo);
+    int indice = 0;
+    int pular = escolher_meta(arquivo);
 
-    free(apagar);
+    METAS meta[tamanho_arquivo - 1];
+
+    for (int i = 1; i <= tamanho_arquivo + 1 ; i++) {
+       if (i != pular){
+            fseek(arquivo, sizeof(METAS) * i,SEEK_SET);
+            fread(&meta[indice], sizeof(METAS), 1, arquivo);
+            meta[indice].ID = indice + 1;
+            indice++;
+       }
+    }
+    LimparTela_Pausar(2);
+    fclose(arquivo);
+
+    arquivo = fopen("dados_leitura.txt", "wb");
+    fwrite(meta, sizeof(METAS), tamanho_arquivo - 1, arquivo);
     fclose(arquivo);
     return;
 }

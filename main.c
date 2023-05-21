@@ -28,6 +28,12 @@ void verificar_ErroAbrir (FILE *arquivo) {
 int escolher_meta(FILE *arquivo) {
     METAS meta;
     int tamanho_arquivo = tamanho(arquivo);
+    if (tamanho(arquivo) == 0) {
+        printf("Não existe histórico para printar\n");
+        fclose(arquivo);
+        return;
+    }
+
     rewind(arquivo);
 
     printf("[id] nome do livro\n");

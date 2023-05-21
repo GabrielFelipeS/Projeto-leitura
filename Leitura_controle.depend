@@ -12,7 +12,7 @@
 1679256057 source:c:\users\dell\onedrive\Área de trabalho\faculdade\teste\leitura_controle\main.c
 	"Controle_leitura.h"
 
-1679678634 source:c:\users\dell\onedrive\Área de trabalho\faculdade\disciplinas\estruturas de dados\leitura_controle\main.c
+1680387288 source:c:\users\dell\onedrive\Área de trabalho\faculdade\disciplinas\estruturas de dados\leitura_controle\main.c
 	"Controle_leitura.h"
 
 1679675264 c:\users\dell\onedrive\Área de trabalho\faculdade\disciplinas\estruturas de dados\leitura_controle\controle_leitura.h
@@ -24,6 +24,21 @@
 	<time.h>
 	<locale.h>
 
-1679681928 source:c:\users\dell\onedrive\Área de trabalho\faculdade\disciplinas\estruturas de dados\leitura_controle\controle_leitura.c
+1680792902 source:c:\users\dell\onedrive\Área de trabalho\faculdade\disciplinas\estruturas de dados\leitura_controle\controle_leitura.c
+	"Controle_leitura.h"
+
+1684627748 source:c:\users\dell\onedrive\documentos\faculdade\disciplinas\2° semestre\estrutura de dados - antonio\codigos\leitura_controle\controle_leitura.c
+	"Controle_leitura.h"
+
+1679675266 c:\users\dell\onedrive\documentos\faculdade\disciplinas\2° semestre\estrutura de dados - antonio\codigos\leitura_controle\controle_leitura.h
+	<stdio.h>
+	<stdlib.h>
+	<ctype.h>
+	<string.h>
+	<stdbool.h>
+	<time.h>
+	<locale.h>
+
+1681671394 source:c:\users\dell\onedrive\documentos\faculdade\disciplinas\2° semestre\estrutura de dados - antonio\codigos\leitura_controle\main.c
 	"Controle_leitura.h"
 
